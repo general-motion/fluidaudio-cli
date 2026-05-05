@@ -43,69 +43,18 @@ enum EncoderPrecisionOption: String, CaseIterable, ExpressibleByArgument, Sendab
   }
 }
 
-enum LanguageOption: String, CaseIterable, ExpressibleByArgument, Sendable {
-  case english = "en"
-  case spanish = "es"
-  case french = "fr"
-  case german = "de"
-  case italian = "it"
-  case portuguese = "pt"
-  case romanian = "ro"
-  case polish = "pl"
-  case czech = "cs"
-  case slovak = "sk"
-  case slovenian = "sl"
-  case croatian = "hr"
-  case bosnian = "bs"
-  case russian = "ru"
-  case ukrainian = "uk"
-  case belarusian = "be"
-  case bulgarian = "bg"
-  case serbian = "sr"
+struct LanguageOption: Equatable, ExpressibleByArgument, Sendable {
+  let language: Language
 
-  static var supportedValuesDescription: String {
-    allCases.map(\.rawValue).joined(separator: ", ")
+  init?(argument: String) {
+    guard let language = Language(rawValue: argument) else {
+      return nil
+    }
+    self.language = language
   }
 
-  var language: Language {
-    switch self {
-    case .english:
-      return .english
-    case .spanish:
-      return .spanish
-    case .french:
-      return .french
-    case .german:
-      return .german
-    case .italian:
-      return .italian
-    case .portuguese:
-      return .portuguese
-    case .romanian:
-      return .romanian
-    case .polish:
-      return .polish
-    case .czech:
-      return .czech
-    case .slovak:
-      return .slovak
-    case .slovenian:
-      return .slovenian
-    case .croatian:
-      return .croatian
-    case .bosnian:
-      return .bosnian
-    case .russian:
-      return .russian
-    case .ukrainian:
-      return .ukrainian
-    case .belarusian:
-      return .belarusian
-    case .bulgarian:
-      return .bulgarian
-    case .serbian:
-      return .serbian
-    }
+  static var supportedValuesDescription: String {
+    Language.allCases.map(\.rawValue).joined(separator: ", ")
   }
 }
 
