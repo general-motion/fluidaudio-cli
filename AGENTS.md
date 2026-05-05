@@ -1,0 +1,2 @@
+- Prefer file-local helpers over broad utility files.
+- Name tests after the file or concern they exercise.
