@@ -15,6 +15,7 @@ public struct FluidAudioCommand: AsyncParsableCommand {
       TranscribeCommand.self,
       DiarizeCommand.self,
       VadCommand.self,
+      TtsCommand.self,
       DoctorCommand.self,
     ],
     helpNames: [.short, .long]
