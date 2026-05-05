@@ -110,6 +110,10 @@ enum LanguageOption: String, CaseIterable, ExpressibleByArgument, Sendable {
 }
 
 enum DiarizationModeOption: String, CaseIterable, ExpressibleByArgument, Sendable {
-  case streaming
-  case offline
+  case chunked
+  case fullFile = "full-file"
+
+  static var supportedValuesDescription: String {
+    allCases.map(\.rawValue).joined(separator: ", ")
+  }
 }
