@@ -57,7 +57,7 @@ struct TranscribeCommand: AsyncParsableCommand {
   var outputOptions: CommonOutputOptions
 
   func run() async throws {
-    let inputURL = try FileResolver.existingFile(audioFile)
+    let inputURL = try FileResolver.audioFile(audioFile)
     let transcript = try await transcribe(inputURL)
     try emit(transcript)
   }

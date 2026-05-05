@@ -84,7 +84,7 @@ struct VadCommand: AsyncParsableCommand {
   }
 
   func run() async throws {
-    let inputURL = try FileResolver.existingFile(audioFile)
+    let inputURL = try FileResolver.audioFile(audioFile)
     let config = VadConfig(defaultThreshold: threshold, debugMode: outputOptions.verbose)
 
     Console.status("Loading VAD model...", options: outputOptions)
