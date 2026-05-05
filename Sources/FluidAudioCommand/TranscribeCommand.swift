@@ -79,6 +79,7 @@ struct TranscribeCommand: AsyncParsableCommand {
       language: language?.language
     )
     let elapsed = Date().timeIntervalSince(started)
+    let realTimeFactor = elapsed > 0 ? Float(result.duration / elapsed) : 0
 
     return TranscriptOutput(
       audioFile: inputURL.path,
@@ -88,7 +89,7 @@ struct TranscribeCommand: AsyncParsableCommand {
       processingTimeSeconds: result.processingTime,
       elapsedSeconds: elapsed,
       // CLI RTFx is duration divided by wall-clock command processing time.
-      realTimeFactor: elapsed > 0 ? Float(result.duration / elapsed) : result.rtfx,
+      realTimeFactor: realTimeFactor,
       tokens: result.tokenTimings?.map {
         TranscriptTokenOutput(
           token: $0.token,

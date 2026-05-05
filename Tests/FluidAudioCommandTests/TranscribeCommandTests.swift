@@ -1,4 +1,5 @@
 import ArgumentParser
+@preconcurrency import FluidAudio
 import XCTest
 
 @testable import FluidAudioCommand
@@ -25,7 +26,7 @@ final class TranscribeCommandTests: XCTestCase {
 
     XCTAssertEqual(parsed.audioFile, "sample.wav")
     XCTAssertEqual(parsed.output, "result.json")
-    XCTAssertEqual(parsed.language, .english)
+    XCTAssertEqual(parsed.language?.language, .english)
     XCTAssertTrue(parsed.outputOptions.json)
     XCTAssertTrue(parsed.outputOptions.quiet)
   }
@@ -42,7 +43,14 @@ final class TranscribeCommandTests: XCTestCase {
     ])
 
     XCTAssertEqual(parsed.model, .parakeetV2)
-    XCTAssertEqual(parsed.language, .spanish)
+    XCTAssertEqual(parsed.language?.language, .spanish)
     XCTAssertEqual(parsed.encoderPrecision, .int4)
+  }
+
+  func testLanguageHelpComesFromFluidAudioLanguages() {
+    XCTAssertEqual(
+      LanguageOption.supportedValuesDescription,
+      Language.allCases.map(\.rawValue).joined(separator: ", ")
+    )
   }
 }
