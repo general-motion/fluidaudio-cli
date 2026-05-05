@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-VERSION="${VERSION:-0.1.0}"
 prefix="/usr/local"
 
 if [[ "$(uname -s)" != "Darwin" ]]; then
@@ -15,7 +14,12 @@ if [[ "$(uname -m)" != "arm64" ]]; then
 fi
 
 archive="fluidaudio-aarch64-apple-darwin.tar.gz"
-url="https://github.com/general-motion/fluidaudio-cli/releases/download/v${VERSION}/${archive}"
+if [[ -n "${VERSION:-}" ]]; then
+  release="v${VERSION#v}"
+  url="https://github.com/general-motion/fluidaudio-cli/releases/download/${release}/${archive}"
+else
+  url="https://github.com/general-motion/fluidaudio-cli/releases/latest/download/${archive}"
+fi
 workdir="$(mktemp -d)"
 
 cleanup() {
