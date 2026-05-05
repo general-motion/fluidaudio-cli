@@ -74,7 +74,7 @@ struct TtsCommand: AsyncParsableCommand {
       // The CLI exposes named voices only; keep SDK speaker selection at its default.
       speakerId: 0
     )
-    try replaceOutputFile(at: outputURL, with: audioData)
+    try audioData.write(to: outputURL, options: .atomic)
     let elapsed = Date().timeIntervalSince(started)
     let result = TtsOutput(
       text: text,
@@ -102,29 +102,6 @@ struct TtsCommand: AsyncParsableCommand {
     guard let voice else { return nil }
     let trimmed = voice.trimmingCharacters(in: .whitespacesAndNewlines)
     return trimmed.isEmpty ? nil : trimmed
-  }
-
-  private func replaceOutputFile(at outputURL: URL, with audioData: Data) throws {
-    // Write to a sibling temporary file first so failed writes do not corrupt existing audio.
-    let temporaryURL = outputURL.deletingLastPathComponent()
-      .appendingPathComponent(".\(outputURL.lastPathComponent).\(UUID().uuidString).tmp")
-    try audioData.write(to: temporaryURL, options: .atomic)
-
-    do {
-      if FileManager.default.fileExists(atPath: outputURL.path) {
-        _ = try FileManager.default.replaceItemAt(
-          outputURL,
-          withItemAt: temporaryURL,
-          backupItemName: nil,
-          options: []
-        )
-      } else {
-        try FileManager.default.moveItem(at: temporaryURL, to: outputURL)
-      }
-    } catch {
-      try? FileManager.default.removeItem(at: temporaryURL)
-      throw error
-    }
   }
 }
 

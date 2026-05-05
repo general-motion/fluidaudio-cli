@@ -17,7 +17,7 @@ struct TranscriptOutput: Codable, Equatable, Sendable {
   let durationSeconds: Double
   let processingTimeSeconds: Double
   let elapsedSeconds: Double
-  let realTimeFactor: Float
+  let realTimeFactor: Double?
   let tokens: [TranscriptTokenOutput]
 }
 
@@ -79,7 +79,7 @@ struct TranscribeCommand: AsyncParsableCommand {
       language: language?.language
     )
     let elapsed = Date().timeIntervalSince(started)
-    let realTimeFactor = elapsed > 0 ? Float(result.duration / elapsed) : 0
+    let realTimeFactor = elapsed > 0 ? result.duration / elapsed : nil
 
     return TranscriptOutput(
       audioFile: inputURL.path,
