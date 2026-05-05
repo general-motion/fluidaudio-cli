@@ -19,20 +19,27 @@ extension DoctorCommand {
   }
 
   func architectureCheck() -> DoctorCheckOutput {
-    if SystemInfo.isAppleSilicon {
+    Self.architectureCheck(
+      isAppleSilicon: SystemInfo.isAppleSilicon,
+      summary: SystemInfo.summary()
+    )
+  }
+
+  static func architectureCheck(isAppleSilicon: Bool, summary: String) -> DoctorCheckOutput {
+    if isAppleSilicon {
       return DoctorCheckOutput(
         name: "architecture",
         status: .ok,
         message: "Running on Apple Silicon",
-        detail: SystemInfo.summary()
+        detail: summary
       )
     }
 
     return DoctorCheckOutput(
       name: "architecture",
-      status: .warning,
-      message: "Most FluidAudio models are optimized for Apple Silicon",
-      detail: SystemInfo.summary()
+      status: .failed,
+      message: "Apple Silicon is required",
+      detail: summary
     )
   }
 

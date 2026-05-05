@@ -41,6 +41,15 @@ final class DoctorCommandTests: XCTestCase {
     )
   }
 
+  func testArchitectureCheckRequiresAppleSilicon() {
+    let check = DoctorCommand.architectureCheck(isAppleSilicon: false, summary: "arch=x86_64")
+
+    XCTAssertEqual(check.name, "architecture")
+    XCTAssertEqual(check.status, .failed)
+    XCTAssertEqual(check.message, "Apple Silicon is required")
+    XCTAssertEqual(check.detail, "arch=x86_64")
+  }
+
   func testTextRendering() {
     let checks = [
       DoctorCheckOutput(

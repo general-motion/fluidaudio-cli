@@ -36,6 +36,14 @@ final class TtsCommandTests: XCTestCase {
       FileManager.default.fileExists(atPath: outputURL.deletingLastPathComponent().path))
   }
 
+  func testRejectsOverlappingOutputAndSummaryPaths() throws {
+    let directory = try makeTemporaryDirectory()
+    let outputURL = directory.appendingPathComponent("out.wav")
+
+    XCTAssertThrowsError(
+      try TtsCommand.validateDistinctOutputPaths(outputURL: outputURL, summaryURL: outputURL))
+  }
+
   private func makeTemporaryDirectory() throws -> URL {
     let directory = FileManager.default.temporaryDirectory
       .appendingPathComponent(UUID().uuidString, isDirectory: true)

@@ -59,6 +59,8 @@ struct TtsCommand: AsyncParsableCommand {
   func run() async throws {
     let outputURL = try FileResolver.prepareOutputFile(output)
     let summaryURL = try summaryOutput.map { try FileResolver.prepareOutputFile($0) }
+    try Self.validateDistinctOutputPaths(outputURL: outputURL, summaryURL: summaryURL)
+
     // Users choose voices by name; omit --voice to use the SDK's recommended default.
     let selectedVoice = normalizedVoice ?? TtsConstants.recommendedVoice
     Console.status("Loading Kokoro TTS model...", options: outputOptions)
@@ -102,6 +104,15 @@ struct TtsCommand: AsyncParsableCommand {
     guard let voice else { return nil }
     let trimmed = voice.trimmingCharacters(in: .whitespacesAndNewlines)
     return trimmed.isEmpty ? nil : trimmed
+  }
+
+  static func validateDistinctOutputPaths(outputURL: URL, summaryURL: URL?) throws {
+    guard let summaryURL else { return }
+    let resolvedOutput = outputURL.resolvingSymlinksInPath().standardizedFileURL.path
+    let resolvedSummary = summaryURL.resolvingSymlinksInPath().standardizedFileURL.path
+    guard resolvedOutput != resolvedSummary else {
+      throw ValidationError("--output and --summary-output must be different paths.")
+    }
   }
 }
 

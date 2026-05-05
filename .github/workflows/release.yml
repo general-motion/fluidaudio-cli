@@ -40,6 +40,14 @@ jobs:
             exit 1
           fi
 
+      - name: Run checks
+        run: make check
+
+      - name: Run CLI smoke tests
+        run: |
+          .build/debug/fluidaudio --help
+          .build/debug/fluidaudio --version
+
       - name: Build release binary
         run: swift build -c release --product fluidaudio
 
