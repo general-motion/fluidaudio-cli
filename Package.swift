@@ -38,5 +38,11 @@ let package = Package(
         "FluidAudioCommand",
       ]
     ),
+    .testTarget(
+      name: "FluidAudioCommandIntegrationTests",
+      dependencies: [
+        "FluidAudioCommand"
+      ]
+    ),
   ]
 )

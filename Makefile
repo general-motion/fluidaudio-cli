@@ -1,7 +1,7 @@
 SWIFT_SOURCES := Package.swift Sources Tests
 SWIFT_CHECK_FLAGS := -Xswiftc -warnings-as-errors -Xswiftc -strict-concurrency=complete
 
-.PHONY: build check format format-check lint lint-format lint-swiftlint resolve test
+.PHONY: build check format format-check integration-test lint lint-format lint-swiftlint model-integration-test release-integration-test resolve test
 
 check: lint build test
 
@@ -25,4 +25,14 @@ lint-swiftlint: resolve
 	swift package plugin --allow-writing-to-package-directory swiftlint
 
 test:
-	swift test $(SWIFT_CHECK_FLAGS) --parallel
+	swift test $(SWIFT_CHECK_FLAGS) --parallel --skip FluidAudioCommandIntegrationTests.FluidAudioCommandModelIntegrationTests
+
+integration-test: build
+	swift test $(SWIFT_CHECK_FLAGS) --filter FluidAudioCommandIntegrationTests.FluidAudioCommandIntegrationTests
+
+model-integration-test: build
+	swift test $(SWIFT_CHECK_FLAGS) --filter FluidAudioCommandIntegrationTests.FluidAudioCommandModelIntegrationTests
+
+release-integration-test:
+	FLUIDAUDIO_CLI_BINARY=.build/release/fluidaudio swift test $(SWIFT_CHECK_FLAGS) --filter FluidAudioCommandIntegrationTests.FluidAudioCommandIntegrationTests
+	FLUIDAUDIO_CLI_BINARY=.build/release/fluidaudio swift test $(SWIFT_CHECK_FLAGS) --filter FluidAudioCommandIntegrationTests.FluidAudioCommandModelIntegrationTests
