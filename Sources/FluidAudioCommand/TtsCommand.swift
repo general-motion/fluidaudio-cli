@@ -69,7 +69,7 @@ struct TtsCommand: AsyncParsableCommand {
     let started = Date()
     let audioData = try await manager.synthesize(
       text: text,
-      voice: normalizedVoice,
+      voice: selectedVoice,
       voiceSpeed: speed,
       // The CLI exposes named voices only; keep SDK speaker selection at its default.
       speakerId: 0
