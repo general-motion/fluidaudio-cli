@@ -23,6 +23,8 @@ struct DiarizationOutput: Codable, Equatable, Sendable {
 }
 
 struct DiarizeCommand: AsyncParsableCommand {
+  private static let sampleRate = ASRConstants.sampleRate
+
   static let configuration = CommandConfiguration(
     commandName: "diarize",
     abstract: "Identify who spoke when in an audio file.",
@@ -111,11 +113,12 @@ struct DiarizeCommand: AsyncParsableCommand {
     Console.status(
       "Diarizing \(inputURL.lastPathComponent) with chunked pipeline...", options: outputOptions)
     let started = Date()
-    let samples = try AudioConverter().resampleAudioFile(inputURL)
-    let duration = metadataDuration ?? Double(samples.count) / Double(VadManager.sampleRate)
+    let samples = try AudioConverter(sampleRate: Double(Self.sampleRate)).resampleAudioFile(
+      inputURL)
+    let duration = metadataDuration ?? Self.durationSeconds(sampleCount: samples.count)
     let diarization = try await manager.performCompleteDiarization(
       samples,
-      sampleRate: VadManager.sampleRate
+      sampleRate: Self.sampleRate
     )
     let elapsed = Date().timeIntervalSince(started)
     return makeOutput(
@@ -127,7 +130,9 @@ struct DiarizeCommand: AsyncParsableCommand {
     )
   }
 
-  private func runFullFile(inputURL: URL, duration: Double?) async throws -> DiarizationOutput {
+  private func runFullFile(
+    inputURL: URL, duration metadataDuration: Double?
+  ) async throws -> DiarizationOutput {
     Console.status("Loading full-file diarization models...", options: outputOptions)
     // "full-file" maps to the SDK's offline diarizer, which processes the file URL directly.
     let config = OfflineDiarizerConfig(
@@ -140,6 +145,7 @@ struct DiarizeCommand: AsyncParsableCommand {
     let started = Date()
     let diarization = try await manager.process(inputURL)
     let elapsed = Date().timeIntervalSince(started)
+    let duration = try metadataDuration ?? fallbackDurationSeconds(for: inputURL)
     return makeOutput(
       inputURL: inputURL,
       mode: mode.rawValue,
@@ -201,6 +207,15 @@ struct DiarizeCommand: AsyncParsableCommand {
     let sampleRate = audioFile.processingFormat.sampleRate
     guard sampleRate > 0 else { return nil }
     return Double(audioFile.length) / sampleRate
+  }
+
+  private static func durationSeconds(sampleCount: Int) -> Double {
+    Double(sampleCount) / Double(Self.sampleRate)
+  }
+
+  private func fallbackDurationSeconds(for url: URL) throws -> Double {
+    let samples = try AudioConverter(sampleRate: Double(Self.sampleRate)).resampleAudioFile(url)
+    return Self.durationSeconds(sampleCount: samples.count)
   }
 
   static func renderText(_ result: DiarizationOutput) -> String {
