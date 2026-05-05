@@ -37,7 +37,7 @@ enum Console {
 
   private static func writeText(_ text: String, to path: String) throws -> URL {
     let url = try FileResolver.prepareOutputFile(path)
-    try Data(text.utf8).write(to: url)
+    try Data(text.utf8).write(to: url, options: .atomic)
     return url
   }
 
@@ -64,7 +64,7 @@ enum Console {
     pretty: Bool = false
   ) throws -> URL {
     let url = try FileResolver.prepareOutputFile(path)
-    try encodeJSON(value, pretty: pretty).write(to: url)
+    try encodeJSON(value, pretty: pretty).write(to: url, options: .atomic)
     return url
   }
 
