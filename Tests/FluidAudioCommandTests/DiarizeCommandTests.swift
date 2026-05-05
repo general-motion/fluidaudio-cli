@@ -12,6 +12,38 @@ final class DiarizeCommandTests: XCTestCase {
     XCTAssertEqual(fullFileParsed.mode, .fullFile)
   }
 
+  func testParsesWholeSecondChunkOptions() throws {
+    let parsed = try DiarizeCommand.parse([
+      "meeting.wav",
+      "--chunk-seconds",
+      "5",
+      "--overlap-seconds",
+      "1",
+    ])
+
+    XCTAssertEqual(parsed.chunkSeconds, 5)
+    XCTAssertEqual(parsed.overlapSeconds, 1)
+  }
+
+  func testRejectsFractionalChunkOptions() {
+    XCTAssertThrowsError(
+      try DiarizeCommand.parse([
+        "meeting.wav",
+        "--chunk-seconds",
+        "0.4",
+      ])
+    )
+    XCTAssertThrowsError(
+      try DiarizeCommand.parse([
+        "meeting.wav",
+        "--chunk-seconds",
+        "1",
+        "--overlap-seconds",
+        "0.9",
+      ])
+    )
+  }
+
   func testRejectsInvalidOverlap() throws {
     XCTAssertThrowsError(
       try DiarizeCommand.parse([
@@ -50,7 +82,7 @@ final class DiarizeCommandTests: XCTestCase {
       try DiarizeCommand.parse([
         "meeting.wav",
         "--chunk-seconds",
-        "inf",
+        "0",
       ]).validate()
     )
   }

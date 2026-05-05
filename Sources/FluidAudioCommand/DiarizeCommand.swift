@@ -48,11 +48,12 @@ struct DiarizeCommand: AsyncParsableCommand {
   @Option(help: "Speaker clustering threshold. Defaults to the selected SDK pipeline's default.")
   var threshold: Float?
 
-  @Option(name: .customLong("chunk-seconds"), help: "Chunked mode chunk duration in seconds.")
-  var chunkSeconds: Float = 10.0
+  @Option(name: .customLong("chunk-seconds"), help: "Chunked mode chunk duration in whole seconds.")
+  var chunkSeconds: Int = 10
 
-  @Option(name: .customLong("overlap-seconds"), help: "Chunked mode chunk overlap in seconds.")
-  var overlapSeconds: Float = 0.0
+  @Option(
+    name: .customLong("overlap-seconds"), help: "Chunked mode chunk overlap in whole seconds.")
+  var overlapSeconds: Int = 0
 
   @OptionGroup
   var outputOptions: CommonOutputOptions
@@ -63,17 +64,17 @@ struct DiarizeCommand: AsyncParsableCommand {
         throw ValidationError("--threshold must be greater than zero and at most 1.")
       }
     }
-    guard chunkSeconds.isFinite, chunkSeconds > 0 else {
-      throw ValidationError("--chunk-seconds must be greater than zero.")
+    guard chunkSeconds > 0 else {
+      throw ValidationError("--chunk-seconds must be a positive whole number.")
     }
-    guard overlapSeconds.isFinite, overlapSeconds >= 0, overlapSeconds < chunkSeconds else {
+    guard overlapSeconds >= 0, overlapSeconds < chunkSeconds else {
       throw ValidationError(
         "--overlap-seconds must be greater than or equal to zero and less than --chunk-seconds.")
     }
   }
 
   func run() async throws {
-    let inputURL = try FileResolver.existingFile(audioFile)
+    let inputURL = try FileResolver.audioFile(audioFile)
     // AVFoundation metadata is fast when available; chunked mode can fall back to sample count.
     let duration = durationSeconds(for: inputURL)
     let result: DiarizationOutput
@@ -103,8 +104,8 @@ struct DiarizeCommand: AsyncParsableCommand {
     let config = DiarizerConfig(
       clusteringThreshold: effectiveThreshold(for: .chunked),
       debugMode: outputOptions.verbose,
-      chunkDuration: chunkSeconds,
-      chunkOverlap: overlapSeconds
+      chunkDuration: Float(chunkSeconds),
+      chunkOverlap: Float(overlapSeconds)
     )
     let manager = DiarizerManager(config: config)
     let models = try await DiarizerModels.downloadIfNeeded()
