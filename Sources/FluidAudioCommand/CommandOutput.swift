@@ -5,8 +5,8 @@ struct CommonOutputOptions: ParsableArguments, Sendable {
   @Flag(help: "Emit machine-readable JSON.")
   var json = false
 
-  @Flag(help: "Pretty-print JSON output.")
-  var pretty = false
+  @Flag(help: "Emit compact JSON output.")
+  var compact = false
 
   @Flag(help: "Suppress non-result status output.")
   var quiet = false
@@ -41,19 +41,18 @@ enum Console {
     return url
   }
 
-  /// Encodes stable JSON by sorting keys; pretty printing is opt-in for human inspection.
-  private static func encodeJSON<T: Encodable>(_ value: T, pretty: Bool = false) throws -> Data {
+  private static func encodeJSON<T: Encodable>(_ value: T, compact: Bool = false) throws -> Data {
     let encoder = JSONEncoder()
     var formatting: JSONEncoder.OutputFormatting = [.sortedKeys]
-    if pretty {
+    if !compact {
       formatting.insert(.prettyPrinted)
     }
     encoder.outputFormatting = formatting
     return try encoder.encode(value)
   }
 
-  static func printJSON<T: Encodable>(_ value: T, pretty: Bool = false) throws {
-    let data = try encodeJSON(value, pretty: pretty)
+  static func printJSON<T: Encodable>(_ value: T, compact: Bool = false) throws {
+    let data = try encodeJSON(value, compact: compact)
     FileHandle.standardOutput.write(data)
     FileHandle.standardOutput.write(Data("\n".utf8))
   }
@@ -61,10 +60,10 @@ enum Console {
   static func writeJSON<T: Encodable>(
     _ value: T,
     to path: String,
-    pretty: Bool = false
+    compact: Bool = false
   ) throws -> URL {
     let url = try FileResolver.prepareOutputFile(path)
-    try encodeJSON(value, pretty: pretty).write(to: url, options: .atomic)
+    try encodeJSON(value, compact: compact).write(to: url, options: .atomic)
     return url
   }
 
@@ -81,7 +80,7 @@ enum Console {
   ) throws {
     if let output {
       if options.json {
-        let url = try writeJSON(value, to: output, pretty: options.pretty)
+        let url = try writeJSON(value, to: output, compact: options.compact)
         status("Wrote \(statusDescriptions.json) to \(url.path)", options: options)
       } else {
         let url = try writeText(lineTerminated(textRenderer(value)), to: output)
@@ -91,7 +90,7 @@ enum Console {
     }
 
     if options.json {
-      try printJSON(value, pretty: options.pretty)
+      try printJSON(value, compact: options.compact)
     } else {
       printText(textRenderer(value))
     }

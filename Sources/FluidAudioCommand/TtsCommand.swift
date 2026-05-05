@@ -87,12 +87,12 @@ struct TtsCommand: AsyncParsableCommand {
 
     if let summaryURL {
       // For TTS, --output is the audio file. Summary metadata has its own destination.
-      let url = try Console.writeJSON(result, to: summaryURL.path, pretty: outputOptions.pretty)
+      let url = try Console.writeJSON(result, to: summaryURL.path, compact: outputOptions.compact)
       Console.status("Wrote synthesis summary JSON to \(url.path)", options: outputOptions)
     }
 
     if outputOptions.json {
-      try Console.printJSON(result, pretty: outputOptions.pretty)
+      try Console.printJSON(result, compact: outputOptions.compact)
     } else {
       Console.status("Wrote audio to \(outputURL.path)", options: outputOptions)
     }

@@ -37,10 +37,11 @@ fluidaudio doctor
 ```
 
 For `transcribe`, `diarize`, `vad`, and `doctor`, `--output` mirrors stdout: text by default,
-JSON when `--json` is set. JSON is compact by default; add `--pretty` for formatted output.
+JSON when `--json` is set. JSON is formatted by default; add `--compact` for newline-free output.
 
 For `tts`, `--output` is always the WAV file. Use `--json` for a synthesis summary on stdout,
-or `--summary-output` to write that summary to a file.
+or `--summary-output` to write that summary to a file. Summary JSON follows the same formatted
+default and `--compact` opt-out.
 
 ### Transcribe
 

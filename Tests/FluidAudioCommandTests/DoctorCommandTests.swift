@@ -4,17 +4,17 @@ import XCTest
 @testable import FluidAudioCommand
 
 final class DoctorCommandTests: XCTestCase {
-  func testParsesOutputAndPrettyOptions() throws {
+  func testParsesOutputAndJSONOptions() throws {
     let parsed = try DoctorCommand.parse([
       "--json",
-      "--pretty",
+      "--compact",
       "--output",
       "doctor.json",
     ])
 
     XCTAssertEqual(parsed.output, "doctor.json")
     XCTAssertTrue(parsed.outputOptions.json)
-    XCTAssertTrue(parsed.outputOptions.pretty)
+    XCTAssertTrue(parsed.outputOptions.compact)
   }
 
   func testOverallStatusPrioritizesFailuresThenWarnings() {

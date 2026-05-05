@@ -22,15 +22,27 @@ final class CommandOutputTests: XCTestCase {
   func testCommonOutputOptionsParseFlags() throws {
     let options = try CommonOutputOptions.parse([
       "--json",
-      "--pretty",
+      "--compact",
       "--quiet",
       "--verbose",
     ])
 
     XCTAssertTrue(options.json)
-    XCTAssertTrue(options.pretty)
+    XCTAssertTrue(options.compact)
     XCTAssertTrue(options.quiet)
     XCTAssertTrue(options.verbose)
+  }
+
+  func testCommonOutputOptionsRejectsRemovedFormattingFlag() {
+    XCTAssertThrowsError(try CommonOutputOptions.parse(["--pretty"]))
+  }
+
+  func testCommonOutputOptionsKeepsJSONExpandedUnlessCompact() throws {
+    let defaultOptions = try CommonOutputOptions.parse(["--json"])
+    XCTAssertFalse(defaultOptions.compact)
+
+    let compactOptions = try CommonOutputOptions.parse(["--json", "--compact"])
+    XCTAssertTrue(compactOptions.compact)
   }
 
   func testEmitWritesTextAndJSONCreatingParentDirectories() throws {
@@ -55,30 +67,38 @@ final class CommandOutputTests: XCTestCase {
       output: jsonPath,
       statusDescriptions: StatusDescriptions(text: "fixture text", json: "fixture JSON")
     ) { _ in "hello" }
+    let jsonData = try Data(contentsOf: URL(fileURLWithPath: jsonPath))
     let decoded = try JSONDecoder().decode(
       OutputFixture.self,
-      from: Data(contentsOf: URL(fileURLWithPath: jsonPath))
+      from: jsonData
     )
     XCTAssertEqual(decoded, output)
+
+    let jsonText = try XCTUnwrap(String(data: jsonData, encoding: .utf8))
+    XCTAssertTrue(jsonText.contains("\n"))
   }
 
-  func testWriteJSONEncodesCompactOrPrettyJSON() throws {
+  func testWriteJSONEncodesExpandedByDefaultOrCompactJSON() throws {
     let directory = try makeTemporaryDirectory()
     let compactPath = directory.appendingPathComponent("compact.json").path
-    let prettyPath = directory.appendingPathComponent("pretty.json").path
+    let expandedPath = directory.appendingPathComponent("expanded.json").path
     let output = OutputFixture(message: "ready", count: 1)
 
-    let compactURL = try Console.writeJSON(output, to: compactPath)
+    let expandedURL = try Console.writeJSON(output, to: expandedPath)
+    let expandedData = try Data(contentsOf: expandedURL)
+    let expandedDecoded = try JSONDecoder().decode(OutputFixture.self, from: expandedData)
+    XCTAssertEqual(expandedDecoded, output)
+
+    let expandedText = try XCTUnwrap(String(data: expandedData, encoding: .utf8))
+    XCTAssertTrue(expandedText.contains("\n"))
+
+    let compactURL = try Console.writeJSON(output, to: compactPath, compact: true)
     let compactData = try Data(contentsOf: compactURL)
-    let decoded = try JSONDecoder().decode(OutputFixture.self, from: compactData)
-    XCTAssertEqual(decoded, output)
+    let compactDecoded = try JSONDecoder().decode(OutputFixture.self, from: compactData)
+    XCTAssertEqual(compactDecoded, output)
 
     let compactText = try XCTUnwrap(String(data: compactData, encoding: .utf8))
     XCTAssertFalse(compactText.contains("\n"))
-
-    let prettyURL = try Console.writeJSON(output, to: prettyPath, pretty: true)
-    let prettyText = try XCTUnwrap(String(data: Data(contentsOf: prettyURL), encoding: .utf8))
-    XCTAssertTrue(prettyText.contains("\n"))
   }
 
   func testConsoleEmitWritesTextOrJSONBasedOnOptions() throws {
@@ -99,18 +119,22 @@ final class CommandOutputTests: XCTestCase {
     )
     XCTAssertEqual(emittedText, "plain report\n")
 
-    let jsonOptions = try CommonOutputOptions.parse(["--json"])
+    let jsonOptions = try CommonOutputOptions.parse(["--json", "--compact"])
     try Console.emit(
       output,
       options: jsonOptions,
       output: jsonPath,
       statusDescriptions: StatusDescriptions(text: "fixture text", json: "fixture JSON")
     ) { _ in "plain report" }
+    let jsonData = try Data(contentsOf: URL(fileURLWithPath: jsonPath))
     let decoded = try JSONDecoder().decode(
       OutputFixture.self,
-      from: Data(contentsOf: URL(fileURLWithPath: jsonPath))
+      from: jsonData
     )
     XCTAssertEqual(decoded, output)
+
+    let emittedJSON = try XCTUnwrap(String(data: jsonData, encoding: .utf8))
+    XCTAssertFalse(emittedJSON.contains("\n"))
   }
 
   private func makeTemporaryDirectory() throws -> URL {
