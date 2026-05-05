@@ -13,6 +13,14 @@ final class CLIErrorTests: XCTestCase {
       "Expected a file but found a directory: recordings"
     )
     XCTAssertEqual(
+      CLIError.inputNotReadable("secret.wav").description,
+      "Input file is not readable: secret.wav"
+    )
+    XCTAssertEqual(
+      CLIError.invalidAudioFile("notes.txt").description,
+      "Input file is not a readable audio file: notes.txt"
+    )
+    XCTAssertEqual(
       CLIError.invalidOutputPath("out").description,
       "Invalid output path: out"
     )
@@ -26,6 +34,8 @@ final class CLIErrorTests: XCTestCase {
     let errors: [CLIError] = [
       .inputNotFound("audio.wav"),
       .inputIsDirectory("recordings"),
+      .inputNotReadable("secret.wav"),
+      .invalidAudioFile("notes.txt"),
       .invalidOutputPath("out"),
       .invalidValue("bad value"),
     ]
