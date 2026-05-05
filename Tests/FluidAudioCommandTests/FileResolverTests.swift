@@ -34,6 +34,35 @@ final class FileResolverTests: XCTestCase {
     }
   }
 
+  func testExistingFileRejectsUnreadableFile() throws {
+    let directory = try makeTemporaryDirectory()
+    let inputURL = directory.appendingPathComponent("secret.wav")
+    try Data("secret".utf8).write(to: inputURL)
+    try FileManager.default.setAttributes([.posixPermissions: 0o000], ofItemAtPath: inputURL.path)
+    defer {
+      try? FileManager.default.setAttributes(
+        [.posixPermissions: 0o600], ofItemAtPath: inputURL.path)
+    }
+
+    XCTAssertThrowsError(try FileResolver.existingFile(inputURL.path)) { error in
+      guard case CLIError.inputNotReadable = error else {
+        return XCTFail("Expected inputNotReadable, got \(error)")
+      }
+    }
+  }
+
+  func testAudioFileRejectsInvalidAudio() throws {
+    let directory = try makeTemporaryDirectory()
+    let inputURL = directory.appendingPathComponent("notes.txt")
+    try Data("not audio".utf8).write(to: inputURL)
+
+    XCTAssertThrowsError(try FileResolver.audioFile(inputURL.path)) { error in
+      guard case CLIError.invalidAudioFile = error else {
+        return XCTFail("Expected invalidAudioFile, got \(error)")
+      }
+    }
+  }
+
   func testPrepareOutputFileCreatesParentDirectories() throws {
     let directory = try makeTemporaryDirectory()
     let outputURL = directory.appendingPathComponent("nested/result.json")

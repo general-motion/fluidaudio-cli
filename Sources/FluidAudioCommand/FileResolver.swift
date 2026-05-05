@@ -1,3 +1,4 @@
+@preconcurrency import AVFoundation
 import Foundation
 
 /// Resolves user-provided CLI paths into file URLs and validates common input/output cases.
@@ -45,6 +46,20 @@ enum FileResolver {
     }
     guard !isDirectory.boolValue else {
       throw CLIError.inputIsDirectory(path)
+    }
+    guard FileManager.default.isReadableFile(atPath: url.path) else {
+      throw CLIError.inputNotReadable(path)
+    }
+    return url
+  }
+
+  /// Resolves and verifies an input path that must be readable by AVFoundation as audio.
+  static func audioFile(_ path: String) throws -> URL {
+    let url = try existingFile(path)
+    do {
+      _ = try AVAudioFile(forReading: url)
+    } catch {
+      throw CLIError.invalidAudioFile(path)
     }
     return url
   }
