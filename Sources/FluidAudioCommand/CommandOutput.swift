@@ -27,8 +27,12 @@ enum Console {
     fputs("\(message)\n", stderr)
   }
 
-  private static func printLine(_ message: String) {
-    FileHandle.standardOutput.write(Data("\(message)\n".utf8))
+  private static func lineTerminated(_ text: String) -> String {
+    text.hasSuffix("\n") ? text : text + "\n"
+  }
+
+  private static func printText(_ text: String) {
+    FileHandle.standardOutput.write(Data(lineTerminated(text).utf8))
   }
 
   private static func writeText(_ text: String, to path: String) throws -> URL {
@@ -80,9 +84,7 @@ enum Console {
         let url = try writeJSON(value, to: output, pretty: options.pretty)
         status("Wrote \(statusDescriptions.json) to \(url.path)", options: options)
       } else {
-        let rendered = textRenderer(value)
-        let text = rendered.hasSuffix("\n") ? rendered : rendered + "\n"
-        let url = try writeText(text, to: output)
+        let url = try writeText(lineTerminated(textRenderer(value)), to: output)
         status("Wrote \(statusDescriptions.text) to \(url.path)", options: options)
       }
       return
@@ -91,7 +93,7 @@ enum Console {
     if options.json {
       try printJSON(value, pretty: options.pretty)
     } else {
-      printLine(textRenderer(value))
+      printText(textRenderer(value))
     }
   }
 }

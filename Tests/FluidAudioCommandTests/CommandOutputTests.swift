@@ -44,7 +44,7 @@ final class CommandOutputTests: XCTestCase {
       options: try CommonOutputOptions.parse([]),
       output: textPath,
       statusDescriptions: StatusDescriptions(text: "fixture text", json: "fixture JSON")
-    ) { _ in "hello" }
+    ) { _ in "hello\n" }
     let textData = try Data(contentsOf: URL(fileURLWithPath: textPath))
     let text = try XCTUnwrap(String(data: textData, encoding: .utf8))
     XCTAssertEqual(text, "hello\n")
