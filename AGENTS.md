@@ -1,2 +1,3 @@
 - Prefer file-local helpers over broad utility files.
 - Name tests after the file or concern they exercise.
+- Prefer arrange/act/assert flow in tests, but do not make simple tests less readable to force it.
