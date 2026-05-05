@@ -12,7 +12,8 @@ public struct FluidAudioCommand: AsyncParsableCommand {
     abstract: "Transcribe audio, identify speakers, detect speech, and synthesize voice locally.",
     version: cliVersion,
     subcommands: [
-      DoctorCommand.self
+      TranscribeCommand.self,
+      DoctorCommand.self,
     ],
     helpNames: [.short, .long]
   )

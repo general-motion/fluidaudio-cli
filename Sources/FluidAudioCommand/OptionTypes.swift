@@ -7,6 +7,10 @@ enum ASRModelOption: String, CaseIterable, ExpressibleByArgument, Sendable {
   case parakeetTdtCtc110m = "parakeet-tdt-ctc-110m"
   case parakeetJapanese = "parakeet-ja"
 
+  static var supportedValuesDescription: String {
+    allCases.map(\.rawValue).joined(separator: ", ")
+  }
+
   var version: AsrModelVersion {
     switch self {
     case .parakeetV3:
@@ -24,6 +28,10 @@ enum ASRModelOption: String, CaseIterable, ExpressibleByArgument, Sendable {
 enum EncoderPrecisionOption: String, CaseIterable, ExpressibleByArgument, Sendable {
   case int8
   case int4
+
+  static var supportedValuesDescription: String {
+    allCases.map(\.rawValue).joined(separator: ", ")
+  }
 
   var precision: ParakeetEncoderPrecision {
     switch self {
@@ -54,6 +62,10 @@ enum LanguageOption: String, CaseIterable, ExpressibleByArgument, Sendable {
   case belarusian = "be"
   case bulgarian = "bg"
   case serbian = "sr"
+
+  static var supportedValuesDescription: String {
+    allCases.map(\.rawValue).joined(separator: ", ")
+  }
 
   var language: Language {
     switch self {
