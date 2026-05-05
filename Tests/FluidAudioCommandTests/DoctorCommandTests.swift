@@ -67,4 +67,15 @@ final class DoctorCommandTests: XCTestCase {
       ].joined(separator: "\n")
     )
   }
+
+  func testRegistryTimeoutCheckUsesDedicatedMessage() throws {
+    let url = try XCTUnwrap(URL(string: "https://example.com/models"))
+
+    let check = DoctorCommand.registryTimeoutCheck(url: url, seconds: 10)
+
+    XCTAssertEqual(check.name, "model-registry")
+    XCTAssertEqual(check.status, .failed)
+    XCTAssertEqual(check.message, "Model registry check timed out after 10s")
+    XCTAssertEqual(check.detail, "https://example.com/models")
+  }
 }

@@ -1,6 +1,11 @@
 @preconcurrency import FluidAudio
 import Foundation
 
+private enum RegistryCheckError: Error {
+  case timedOut(seconds: UInt64)
+  case missingResponse
+}
+
 extension DoctorCommand {
   func platformCheck() -> DoctorCheckOutput {
     let version = ProcessInfo.processInfo.operatingSystemVersion
@@ -73,8 +78,19 @@ extension DoctorCommand {
   }
 
   func registryCheck() async -> DoctorCheckOutput {
+    let url: URL
     do {
-      let url = try ModelRegistry.apiModels(Repo.vad.remotePath, "tree/main")
+      url = try ModelRegistry.apiModels(Repo.vad.remotePath, "tree/main")
+    } catch {
+      return DoctorCheckOutput(
+        name: "model-registry",
+        status: .failed,
+        message: "Could not create model registry URL",
+        detail: error.localizedDescription
+      )
+    }
+
+    do {
       let response = try await registryResponse(from: url)
       guard let http = response as? HTTPURLResponse else {
         return DoctorCheckOutput(
@@ -92,6 +108,8 @@ extension DoctorCommand {
           ? "Model registry is reachable" : "Model registry returned HTTP \(http.statusCode)",
         detail: url.absoluteString
       )
+    } catch RegistryCheckError.timedOut(let seconds) {
+      return Self.registryTimeoutCheck(url: url, seconds: seconds)
     } catch {
       return DoctorCheckOutput(
         name: "model-registry",
@@ -110,6 +128,15 @@ extension DoctorCommand {
       return .warning
     }
     return .ok
+  }
+
+  static func registryTimeoutCheck(url: URL, seconds: UInt64) -> DoctorCheckOutput {
+    DoctorCheckOutput(
+      name: "model-registry",
+      status: .failed,
+      message: "Model registry check timed out after \(seconds)s",
+      detail: url.absoluteString
+    )
   }
 
   static func renderText(_ result: DoctorOutput) -> String {
@@ -174,12 +201,11 @@ extension DoctorCommand {
       }
       group.addTask {
         try await Task.sleep(for: .seconds(Self.registryCheckTimeoutSeconds))
-        throw CLIError.invalidValue(
-          "Registry check timed out after \(Self.registryCheckTimeoutSeconds) seconds.")
+        throw RegistryCheckError.timedOut(seconds: Self.registryCheckTimeoutSeconds)
       }
 
       guard let response = try await group.next() else {
-        throw CLIError.invalidValue("Registry check did not return a response.")
+        throw RegistryCheckError.missingResponse
       }
       group.cancelAll()
       return response
