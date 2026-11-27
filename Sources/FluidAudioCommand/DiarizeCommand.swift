@@ -117,7 +117,7 @@ struct DiarizeCommand: AsyncParsableCommand {
     let samples = try AudioConverter(sampleRate: Double(Self.sampleRate)).resampleAudioFile(
       inputURL)
     let duration = metadataDuration ?? Self.durationSeconds(sampleCount: samples.count)
-    let diarization = try await manager.performCompleteDiarization(
+    let diarization = try manager.performCompleteDiarization(
       samples,
       sampleRate: Self.sampleRate
     )

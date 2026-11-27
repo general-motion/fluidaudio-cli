@@ -64,7 +64,7 @@ struct TtsCommand: AsyncParsableCommand {
     // Users choose voices by name; omit --voice to use the SDK's recommended default.
     let selectedVoice = normalizedVoice ?? TtsConstants.recommendedVoice
     Console.status("Loading Kokoro TTS model...", options: outputOptions)
-    let manager = KokoroTtsManager(defaultVoice: TtsConstants.recommendedVoice)
+    let manager = KokoroAneManager(defaultVoice: TtsConstants.recommendedVoice)
     try await manager.initialize(preloadVoices: [selectedVoice])
 
     Console.status("Synthesizing speech...", options: outputOptions)
@@ -72,9 +72,7 @@ struct TtsCommand: AsyncParsableCommand {
     let audioData = try await manager.synthesize(
       text: text,
       voice: selectedVoice,
-      voiceSpeed: speed,
-      // The CLI exposes named voices only; keep SDK speaker selection at its default.
-      speakerId: 0
+      speed: speed
     )
     try audioData.write(to: outputURL, options: .atomic)
     let elapsed = Date().timeIntervalSince(started)

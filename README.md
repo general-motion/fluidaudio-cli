@@ -49,6 +49,7 @@ default and `--compact` opt-out.
 fluidaudio transcribe audio.wav
 fluidaudio transcribe audio.wav --json --output transcript.json
 fluidaudio transcribe audio.wav --language en --model parakeet-v3
+fluidaudio transcribe audio.wav --model parakeet-ultra
 ```
 
 ### Diarize

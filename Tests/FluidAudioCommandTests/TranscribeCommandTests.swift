@@ -47,6 +47,12 @@ final class TranscribeCommandTests: XCTestCase {
     XCTAssertEqual(parsed.encoderPrecision, .int4)
   }
 
+  func testParakeetUltraLoadsTheUltraModel() throws {
+    let parsed = try TranscribeCommand.parse(["sample.wav", "--model", "parakeet-ultra"])
+
+    XCTAssertEqual(parsed.model.version, .ultra)
+  }
+
   func testLanguageHelpComesFromFluidAudioLanguages() {
     XCTAssertEqual(
       LanguageOption.supportedValuesDescription,

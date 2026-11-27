@@ -4,7 +4,7 @@ import ArgumentParser
 @available(macOS 14.0, *)
 public struct FluidAudioCommand: AsyncParsableCommand {
   /// The semantic version displayed by the command-line interface.
-  public static let cliVersion = "0.1.0"
+  public static let cliVersion = "0.2.0"
 
   /// The command tree and metadata used by Swift Argument Parser.
   public static let configuration = CommandConfiguration(

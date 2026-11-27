@@ -2,6 +2,7 @@ import ArgumentParser
 @preconcurrency import FluidAudio
 
 enum ASRModelOption: String, CaseIterable, ExpressibleByArgument, Sendable {
+  case parakeetUltra = "parakeet-ultra"
   case parakeetV3 = "parakeet-v3"
   case parakeetV2 = "parakeet-v2"
   case parakeetTdtCtc110m = "parakeet-tdt-ctc-110m"
@@ -13,6 +14,8 @@ enum ASRModelOption: String, CaseIterable, ExpressibleByArgument, Sendable {
 
   var version: AsrModelVersion {
     switch self {
+    case .parakeetUltra:
+      return .ultra
     case .parakeetV3:
       return .v3
     case .parakeetV2:

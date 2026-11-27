@@ -59,11 +59,8 @@ extension DoctorCommand {
     )
 
     do {
-      let ttsRoot = try TtsModels.cacheDirectoryURL()
-      let ttsModelsRoot = ttsRoot.appendingPathComponent(
-        TtsConstants.defaultModelsSubdirectory,
-        isDirectory: true
-      )
+      let ttsRoot = try TtsCacheDirectory.ensure()
+      let ttsModelsRoot = ttsRoot.appendingPathComponent("Models", isDirectory: true)
       let ttsCheck = modelCacheCheck(
         name: "tts-model-cache",
         rootDescription: "TTS model",
@@ -203,7 +200,7 @@ extension DoctorCommand {
     // The SDK fetch has no timeout knob, so race it against a sleep task.
     try await withThrowingTaskGroup(of: URLResponse.self) { group in
       group.addTask {
-        let (_, response) = try await DownloadUtils.fetchWithAuth(from: url)
+        let (_, response) = try await ModelHub.fetchWithAuth(from: url)
         return response
       }
       group.addTask {
